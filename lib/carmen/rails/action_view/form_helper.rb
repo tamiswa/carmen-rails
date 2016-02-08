@@ -207,12 +207,12 @@ module ActionView
 
             value = options[:selected] ? options[:selected] : value(object)
             priority_regions = options[:priority] || []
-            opts = add_options(region_options_for_select(parent_region.subregions, value, 
-                                                        :priority => priority_regions), 
+            opts = add_options(region_options_for_select(parent_region.subregions, value,
+                                                        :priority => priority_regions),
                                options, value)
             select = content_tag("select", opts, html_options)
             if html_options["multiple"] && options.fetch(:include_hidden, true)
-              tag("input", :disabled => html_options["disabled"], :name => html_options["name"], 
+              tag("input", :disabled => html_options["disabled"], :name => html_options["name"],
                            :type => "hidden", :value => "") + select
             else
               select
@@ -221,6 +221,32 @@ module ActionView
         end
       end
     end
+
+    if (Rails::VERSION::MAJOR == 5)
+      module Tags
+        class Base
+          def to_region_select_tag(parent_region, options = {}, html_options = {})
+            html_options = html_options.stringify_keys
+            add_default_name_and_id(html_options)
+            options[:include_blank] ||= true unless options[:prompt] || !placeholder_required?(html_options)
+
+            value = options[:selected] ? options[:selected] : value(object)
+            priority_regions = options[:priority] || []
+            opts = add_options(region_options_for_select(parent_region.subregions, value,
+                                                        :priority => priority_regions),
+                               options, value)
+            select = content_tag("select", opts, html_options)
+            if html_options["multiple"] && options.fetch(:include_hidden, true)
+              tag("input", :disabled => html_options["disabled"], :name => html_options["name"],
+                           :type => "hidden", :value => "") + select
+            else
+              select
+            end
+          end
+        end
+      end
+    end
+
 
     class FormBuilder
       # Generate select and country option tags with the provided name. A
